@@ -9,6 +9,7 @@ import { join } from 'node:path';
 
 export class AgentSwarmOrchestrator {
   private agents: Map<string, BaseAgent> = new Map();
+  private outputDir: string;
   private metrics: SwarmMetrics = {
     totalTokens: 0,
     totalMessages: 0,
@@ -16,6 +17,10 @@ export class AgentSwarmOrchestrator {
     agentUtilization: new Map(),
     taskCompletionRate: 0,
   };
+
+  constructor(outputDir: string = 'workspace') {
+    this.outputDir = outputDir;
+  }
 
   registerAgent(agent: BaseAgent): void {
     this.agents.set(agent.getId(), agent);
@@ -100,7 +105,7 @@ export class AgentSwarmOrchestrator {
   }
 
   private async saveArtifacts(artifacts: Artifact[], taskDescription: string): Promise<void> {
-    const wsDir = join(process.cwd(), 'workspace');
+    const wsDir = join(process.cwd(), this.outputDir);
     await mkdir(wsDir, { recursive: true });
 
     // 保存每个产物
@@ -122,6 +127,6 @@ export class AgentSwarmOrchestrator {
       artifacts.map(a => `- ${a.type}: ${a.content.length} chars`).join('\n');
 
     await writeFile(join(wsDir, 'summary.md'), summary, 'utf-8');
-    console.log(`📁 产物已保存到 workspace/`);
+    console.log(`📁 产物已保存到 ${this.outputDir}/`);
   }
 }
