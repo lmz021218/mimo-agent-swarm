@@ -36,6 +36,10 @@ yarn-error.log*
 coverage/
 .nyc_output/
 
+# Application materials (local only)
+APPLICATION.md
+SCREENSHOT_GUIDE.md
+
 # Temporary files
 tmp/
 temp/
