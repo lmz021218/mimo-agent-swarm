@@ -1,6 +1,6 @@
-﻿# Agent Swarm — 多 Agent 协作开发框架
+﻿# Agent Swarm
 
-> 五个 AI Agent 分工协作：需求分析、架构设计、代码生成、审查、测试。输入一句话，产出完整项目。
+> 五个 AI Agent 串行协作。给一句话，它跑完需求 → 架构 → 编码 → 审查 → 测试全流程，产物落到 `workspace/`。
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
@@ -8,212 +8,169 @@
 
 ---
 
-## 📋 项目概述
+## 它是干嘛的
 
-**Agent Swarm** 是一个展示AI Agent长链推理能力的开发框架。
+这是五个各有专长的 Agent，串成一条线跑。你用自然语言描述一个需求，它依次调用 DeepSeek API，每个 Agent 把上一步的输出当输入，一路推进到最终产物。API 不可用时自动走 fallback，本地照样出结果。
 
-`
-用户输入一句话需求
-        │
-        ▼
-┌──────────────────────────────────────────────────┐
-│          Agent Swarm Orchestrator                 │
-│             长链推理 · 任务调度 · 结果聚合          │
-└──────┬───────┬────────┬────────┬─────────┘
-       │       │        │        │
-       ▼       ▼        ▼        ▼        ▼
-   [需求分析] [架构设计] [代码生成] [代码审查] [测试生成]
-   Agent     Agent     Agent     Agent     Agent
-`
-
----
-
-## 🎯 核心价值
-
-| 痛点 | 解决方式 |
-|------|----------|
-| 开发效率低，人工串行处理耗时 | 5个Agent并行协作，端到端自动化 |
-| 需求传递失真，返工率高 | Agent间通过类型化消息传递，消除歧义 |
-| 单一AI难以胜任多领域 | 分领域专用Agent，各司其职 |
-| 缺少可追溯的推理过程 | 完整的长链推理记录，每一步可审计 |
+```
+你的需求："做一个命令行待办事项工具，支持增删查" 
+  │
+  ▼
+需求分析 Agent  ──→  功能点、约束、验收标准
+  │
+  ▼
+架构设计 Agent  ──→  技术栈、模块划分、数据流
+  │
+  ▼
+代码生成 Agent  ──→  完整的 TypeScript 源码（严格的 strict mode）
+  │
+  ▼
+代码审查 Agent  ──→  按严重程度分类的问题列表
+  │
+  ▼
+测试生成 Agent  ──→  vitest 测试用例
+  │
+  ▼
+workspace/ 目录 —— 五个文件，可直接看、可跑
+```
 
 ---
 
-## 🧠 核心技术：长链推理 (Chain-of-Thought)
+## 和 OpenCode 的关系
 
-系统在执行过程中自动记录每一步推理：
+这个项目**不是** OpenCode 插件。它是一组独立 Agent 类，你可以在任何 Node.js 项目里引入：
 
-`
-Step 1 - Orchestrator:
-  Thought: 分析任务复杂度，确定需要5个执行阶段
-  Action:  创建5阶段执行计划
-  Observation: 计划已创建，包含需求分析到测试生成的完整流程
+```typescript
+import { AgentSwarmOrchestrator } from './src/core/orchestrator.js';
+import { RequirementAgent } from './src/agents/requirement-agent.js';
+// ... 其余四个同理
 
-Step 2 - RequirementAgent:
-  Thought: 准备执行需求分析阶段
-  Action:  调用需求分析Agent处理任务
-  Observation: 需求分析Agent已接收任务，开始处理
-  ...
+const orch = new AgentSwarmOrchestrator();
+orch.registerAgent(new RequirementAgent(config));
+// ...
 
-完整推理链: 6步 | 置信度: 100% | 可追溯: ✓
-`
+const { artifacts } = await orch.executeTask('你的需求');
+// artifacts[0] → 需求文档
+// artifacts[3] → 审查报告，依此类推
+```
 
----
-
-## 🚀 真实运行演示
-
-`
-╔════════════════════════════════════════════════════════════╗
-║     Agent Swarm — 多Agent协作演示                        ║
-╚════════════════════════════════════════════════════════════╝
-
-📋 步骤1: 注册专业Agent团队
-
-✅ Agent 已注册: 需求分析Agent (需求分析师)
-✅ Agent 已注册: 架构设计Agent (架构师)
-✅ Agent 已注册: 代码生成Agent (高级开发工程师)
-✅ Agent 已注册: 代码审查Agent (技术负责人)
-✅ Agent 已注册: 测试生成Agent (QA工程师)
-
-📊 系统状态: { agents: 5, activeTasks: 0, totalTokens: 0 }
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 示例任务: 创建一个支持多Agent协作的任务管理系统
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🚀 开始执行任务: 创建一个支持多Agent协作的任务管理系统...
-📋 任务ID: task_1777398789922
-
-📝 创建执行计划...
-
-📌 执行阶段: 需求分析
-[需求分析Agent] 收到消息: request from orchestrator
-
-📌 执行阶段: 架构设计
-[架构设计Agent] 收到消息: request from orchestrator
-
-📌 执行阶段: 代码实现
-[代码生成Agent] 收到消息: request from orchestrator
-
-📌 执行阶段: 代码审查
-[代码审查Agent] 收到消息: request from orchestrator
-
-📌 执行阶段: 测试生成
-[测试生成Agent] 收到消息: request from orchestrator
-
-✅ 任务完成! 耗时: 2563ms
-📊 生成产物: 5 个
-
-📄 生成的产物:
-  1. [document]  req_xxx  -- 需求分析文档
-  2. [diagram]   arch_xxx -- 架构设计图
-  3. [code]      code_xxx -- TypeScript源代码
-  4. [review]    review_xxx -- 代码审查报告
-  5. [test]      test_xxx  -- 测试用例
-
-📈 性能指标:
-  • 总Token消耗: 10,000
-  • 执行时间: 2563ms
-
-🔗 长链推理:
-  • 推理步骤: 6 步
-  • 置信度: 100.0%
-
-✅ 演示完成！
-`
+如果你想把它塞进 OpenCode：把 Agent 类和 Orchestrator 复制到你的 OpenCode skill 目录，在 skill 里 `import` 并调用 `executeTask()` 就行。不需要改代码。
 
 ---
 
-## 📁 项目结构
+## 跑起来
 
-`
-mimo-agent-swarm/
-├── src/
-│   ├── core/
-│   │   ├── types.ts                 # 完整的类型系统定义
-│   │   ├── base-agent.ts            # Agent抽象基类（消息队列、推理引擎）
-│   │   └── orchestrator.ts          # Swarm协调器（任务调度+长链推理）
-│   ├── agents/
-│   │   ├── requirement-agent.ts     # 需求分析Agent
-│   │   ├── architecture-agent.ts    # 架构设计Agent
-│   │   ├── codegen-agent.ts         # 代码生成Agent
-│   │   ├── review-agent.ts          # 代码审查Agent
-│   │   └── test-agent.ts            # 测试生成Agent
-│   ├── demo/
-│   │   └── run-demo.ts              # 完整演示脚本
-│   └── index.ts                     # 公共API入口
-├── package.json
-├── tsconfig.json                    # 严格TypeScript配置
-└── README.md
-`
-
----
-
-## 🛠️ 快速开始
-
-### 前置要求
-- Node.js 18+
-- npm
-
-### 三步运行
-`ash
+```bash
 git clone https://github.com/lmz021218/mimo-agent-swarm.git
 cd mimo-agent-swarm
 npm install
-npm run demo
-`
 
-### 在代码中使用
-`	ypescript
-import { AgentSwarmOrchestrator, RequirementAgent, ArchitectureAgent,
-         CodeGenAgent, ReviewAgent, TestAgent } from 'agent-swarm';
+# 默认任务
+npx tsx src/demo/run-demo.ts
 
-const orchestrator = new AgentSwarmOrchestrator();
-orchestrator.registerAgent(new RequirementAgent({ /* config */ }));
-orchestrator.registerAgent(new ArchitectureAgent({ /* config */ }));
-orchestrator.registerAgent(new CodeGenAgent({ /* config */ }));
-orchestrator.registerAgent(new ReviewAgent({ /* config */ }));
-orchestrator.registerAgent(new TestAgent({ /* config */ }));
+# 自定义任务
+npx tsx src/demo/run-demo.ts "写一个把 Markdown 转 HTML 的 CLI 工具"
+```
 
-const result = await orchestrator.executeTask(
-  '创建一个用户认证系统，支持JWT登录和权限管理'
-);
-console.log(result.artifacts);
-console.log(result.reasoningChain);
-`
+需要 Node.js 18+。
 
 ---
 
-## 📊 技术指标
+## 真实运行结果
 
-| 指标 | 数值 |
+下面是用 DeepSeek API 跑了一次真实的输出（任务："统计目录下所有文件的行数"）：
+
+```
+Agent Swarm — 多Agent协作开发
+目标：写一个 Node.js 命令行工具，用来统计目录下所有文件的行数
+
+╔══════════════════════════════════════╗
+║  任务: 写一个 Node.js 命令行工具...
+╚══════════════════════════════════════╝
+
+🤖 [需求分析] 开始工作...
+   📤 发送请求 (56 chars)
+   📝 功能：支持命令行参数指定目录、递归遍历、按行数排序、排除 node_modules...
+   ✅ 完成 (421 chars)
+
+🤖 [架构设计] 开始工作...
+   📤 发送请求 (472 chars)
+   📝 Node.js + fs/promises + path，cli.ts → counter.ts → fileFilter.ts...
+   ✅ 完成 (1200 chars)
+
+🤖 [代码生成] 开始工作...
+   📤 发送请求 (1717 chars)
+   📝 输出 5 个 TypeScript 文件：index.ts、cli.ts、counter.ts...
+   ✅ 完成 (4516 chars)
+
+🤖 [代码审查] 开始工作...
+   📤 发送请求 (6228 chars)
+   📝 🔴 fileFilter.ts 异步处理 bug / 🟡 空文件统计逻辑 / 🟢 排序健壮性
+   ✅ 完成 (1131 chars)
+
+🤖 [测试生成] 开始工作...
+   📤 发送请求 (7369 chars)
+   📝 425 行 vitest 用例，覆盖 cli、counter、filter、sorter
+   ✅ 完成 (14553 chars)
+
+📁 产物已保存到 workspace/
+✅ 完成。耗时 79s，总产物 21,821 chars
+```
+
+五个文件都在 `workspace/` 目录里，可以直接打开看。
+
+---
+
+## 文件结构
+
+```
+├── src/
+│   ├── core/
+│   │   ├── types.ts            # Artifact、AgentConfig、ReasoningChain
+│   │   ├── base-agent.ts       # execute() 调 LLM，fallback 兜底
+│   │   ├── llm-client.ts       # DeepSeek 流式调用，兼容 OpenAI 格式
+│   │   └── orchestrator.ts     # 串行调度，上下文传递，产物落盘
+│   ├── agents/
+│   │   ├── requirement-agent.ts
+│   │   ├── architecture-agent.ts
+│   │   ├── codegen-agent.ts
+│   │   ├── review-agent.ts
+│   │   └── test-agent.ts
+│   ├── demo/
+│   │   └── run-demo.ts         # 一行命令跑完整流程
+│   └── index.ts                # 导出所有公共类
+├── index.html                  # 展示页面
+├── package.json
+└── tsconfig.json               # strict: true
+```
+
+---
+
+## 当前指标
+
+一次完整运行的数据：
+
+| 项目 | 数据 |
 |------|------|
-| 专业Agent数 | 5 (需求·架构·编码·审查·测试) |
-| 单次Token消耗 | ~10,000-50,000 |
-| 执行时间 | 2-3s (本地) / 30-120s (API) |
-| 推理步骤数 | 6步 |
-| 产物类型 | 5种 |
-| TypeScript | 严格模式，零类型错误 |
+| 耗时 | 79 秒（串行 5 次 API 调用） |
+| 总产物 | 21,821 字符 |
+| 需求分析 | 421 chars |
+| 架构设计 | 1,200 chars |
+| 代码生成 | 4,516 chars / 5 个 .ts 文件 |
+| 代码审查 | 1,131 chars / 6 个问题点 |
+| 测试生成 | 14,553 chars / 425 行 vitest |
+| 编译 | TypeScript strict，零错误 |
+
+换 API key：改 `src/core/llm-client.ts` 头部的三个常量。
 
 ---
 
-## 🏗️ 技术栈
+## 如果 API 挂了
 
-- **语言**: TypeScript 5.3+ (strict mode)
-- **运行时**: Node.js 18+
-- **架构模式**: Agent Pattern + Event-Driven
-- **代码质量**: ESLint + TypeScript Strict
+每个 Agent 带了 fallback。`base-agent.ts` 里 `execute()` 的 catch 块会走 `fallbackExecute()`，用内置的模板产出结果。你断网也能跑，产物照样生成。
 
 ---
 
-## 🔮 未来规划
+## License
 
-- [ ] 接入大模型API，替代模拟推理
-- [ ] 新增安全审计Agent、性能优化Agent、文档生成Agent
-- [ ] 支持自定义Agent插件注册
-- [ ] 可视化工作流编辑器
-- [ ] GitHub Actions集成，自动提交PR
-
-## 📝 License
-
-[MIT](LICENSE)
+MIT
