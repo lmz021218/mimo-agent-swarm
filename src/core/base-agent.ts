@@ -1,4 +1,4 @@
-import { AgentConfig, AgentMessage, TaskContext, AgentCapability } from './types.js';
+import { AgentConfig, AgentMessage, AgentCapability } from './types.js';
 
 /**
  * Agent基类 - 所有专业Agent的抽象基类

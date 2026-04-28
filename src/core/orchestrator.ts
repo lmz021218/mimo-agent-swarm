@@ -333,6 +333,7 @@ export class AgentSwarmOrchestrator {
     phase: ExecutionPhase,
     taskContext: TaskContext
   ): Promise<Artifact | null> {
+    console.log(`为阶段 [${phase.name}] 创建模拟产物`);
     // 根据Agent类型生成对应的产物
     switch (agent.getId()) {
       case 'requirement-agent':

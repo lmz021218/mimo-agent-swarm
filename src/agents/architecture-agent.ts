@@ -12,7 +12,7 @@ export class ArchitectureAgent extends BaseAgent {
     
     if (message.content.includes('需求分析')) {
       const design = await this.createArchitecture(message.content);
-      console.log(`[${this.getName()}] 架构设计完成`);
+      console.log(`[${this.getName()}] 架构设计完成，文档长度: ${design.length}`);
     }
   }
 

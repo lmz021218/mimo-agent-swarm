@@ -12,7 +12,7 @@ export class ReviewAgent extends BaseAgent {
     
     if (message.content.includes('代码') || message.content.includes('实现')) {
       const review = await this.reviewCode(message.content);
-      console.log(`[${this.getName()}] 代码审查完成`);
+      console.log(`[${this.getName()}] 代码审查完成，报告长度: ${review.length}`);
     }
   }
 

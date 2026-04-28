@@ -1,5 +1,5 @@
 import { BaseAgent } from '../core/base-agent.js';
-import { AgentMessage, TaskContext, Artifact } from '../core/types.js';
+import { AgentMessage, Artifact } from '../core/types.js';
 
 /**
  * 需求分析Agent
@@ -15,7 +15,7 @@ export class RequirementAgent extends BaseAgent {
       const response = this.createResponse(message.from, analysis);
       
       // 在真实场景中，这里会将消息发送给协调器
-      console.log(`[${this.getName()}] 分析完成，发送给 ${message.from}`);
+      console.log(`[${this.getName()}] 分析完成，响应长度: ${response.content.length}`);
     }
   }
 

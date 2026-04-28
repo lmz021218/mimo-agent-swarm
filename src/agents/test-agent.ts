@@ -12,7 +12,7 @@ export class TestAgent extends BaseAgent {
     
     if (message.content.includes('代码') || message.content.includes('审查')) {
       const tests = await this.generateTests(message.content);
-      console.log(`[${this.getName()}] 测试生成完成`);
+      console.log(`[${this.getName()}] 测试生成完成，测试代码长度: ${tests.length}`);
     }
   }
 

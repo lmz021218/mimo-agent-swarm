@@ -12,7 +12,7 @@ export class CodeGenAgent extends BaseAgent {
     
     if (message.content.includes('架构') || message.content.includes('设计')) {
       const code = await this.generateCode(message.content);
-      console.log(`[${this.getName()}] 代码生成完成`);
+      console.log(`[${this.getName()}] 代码生成完成，代码长度: ${code.length}`);
     }
   }
 
