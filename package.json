@@ -1,7 +1,7 @@
 {
-  "name": "mimo-agent-swarm",
+  "name": "agent-swarm",
   "version": "1.0.0",
-  "description": "基于多Agent协作的智能软件开发系统 - 小米Mimo百万亿Tokens计划",
+  "description": "多Agent协作开发框架 — 五个专业Agent串联完成需求分析到测试生成",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -17,10 +17,10 @@
     "multi-agent",
     "llm",
     "code-generation",
-    "mimo",
-    "xiaomi"
+    "ai",
+    "multi-agent"
   ],
-  "author": "Mimo Developer",
+  "author": "",
   "license": "MIT",
   "dependencies": {
     "@types/node": "^20.0.0"

@@ -21,7 +21,7 @@ function createConfig(id: string, name: string, role: string): AgentConfig {
 async function main() {
   const task = process.argv[2] || '做一个命令行待办事项工具，支持添加、完成、列出任务';
 
-  console.log('Mimo Agent Swarm — 多Agent协作开发');
+  console.log('Agent Swarm — 多Agent协作开发');
   console.log(`目标：${task}\n`);
 
   const orch = new AgentSwarmOrchestrator();

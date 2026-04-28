@@ -1,6 +1,6 @@
-﻿# 🤖 Mimo Agent Swarm - 多Agent协作智能开发系统
+﻿# Agent Swarm — 多 Agent 协作开发框架
 
-> 基于长链推理与多Agent协作的AI驱动软件开发框架
+> 五个 AI Agent 分工协作：需求分析、架构设计、代码生成、审查、测试。输入一句话，产出完整项目。
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
@@ -10,7 +10,7 @@
 
 ## 📋 项目概述
 
-**Mimo Agent Swarm** 是一个展示AI Agent长链推理能力的开发框架。系统模拟真实软件团队的协作流程——从需求到代码的端到端自动化，通过5个专业AI Agent的分工协作完成复杂任务。
+**Agent Swarm** 是一个展示AI Agent长链推理能力的开发框架。
 
 `
 用户输入一句话需求
@@ -64,7 +64,7 @@ Step 2 - RequirementAgent:
 
 `
 ╔════════════════════════════════════════════════════════════╗
-║     🤖 Mimo Agent Swarm - 多Agent协作演示                 ║
+║     Agent Swarm — 多Agent协作演示                        ║
 ╚════════════════════════════════════════════════════════════╝
 
 📋 步骤1: 注册专业Agent团队
@@ -166,7 +166,7 @@ npm run demo
 ### 在代码中使用
 `	ypescript
 import { AgentSwarmOrchestrator, RequirementAgent, ArchitectureAgent,
-         CodeGenAgent, ReviewAgent, TestAgent } from 'mimo-agent-swarm';
+         CodeGenAgent, ReviewAgent, TestAgent } from 'agent-swarm';
 
 const orchestrator = new AgentSwarmOrchestrator();
 orchestrator.registerAgent(new RequirementAgent({ /* config */ }));

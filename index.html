@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mimo Agent Swarm</title>
+    <title>Agent Swarm</title>
     <style>
         :root {
             --bg: #0d1117;
@@ -249,7 +249,7 @@
 
     <div class="logo">
         <div class="logo-mark"></div>
-        <div class="logo-text">Mimo Agent Swarm</div>
+        <div class="logo-text">Agent Swarm</div>
     </div>
     <p class="subtitle">
         五个 AI Agent 分工协作——需求、架构、编码、审查、测试——把一句话变成完整项目。接 DeepSeek，有 fallback，零编译错误。
@@ -311,7 +311,7 @@
             <span class="terminal-title">demo run — line-counter tool</span>
         </div>
         <div class="terminal-body">
-<span class="dim">Mimo Agent Swarm — 多Agent协作开发</span>
+<span class="dim">Agent Swarm — 多Agent协作开发</span>
 <span class="dim">目标：写一个 Node.js 命令行工具，用来统计目录下所有文件的行数</span>
 
 <span class="hl">╔══════════════════════════════════════╗</span>
@@ -357,7 +357,7 @@
 
     <h2>极简用法</h2>
     <pre><span class="kw">import</span> { AgentSwarmOrchestrator, RequirementAgent, ArchitectureAgent,
-         CodeGenAgent, ReviewAgent, TestAgent } <span class="kw">from</span> <span class="str">'mimo-agent-swarm'</span>;
+         CodeGenAgent, ReviewAgent, TestAgent } <span class="kw">from</span> <span class="str">'agent-swarm'</span>;
 
 <span class="kw">const</span> orch = <span class="kw">new</span> AgentSwarmOrchestrator();
 orch.registerAgent(<span class="kw">new</span> RequirementAgent(config));
