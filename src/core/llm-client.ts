@@ -3,9 +3,9 @@
  * 兼容 OpenAI Chat Completions 格式
  */
 
-const API_BASE = 'https://api.moonshot.cn/v1';
-const API_KEY = 'sk-kimi-gzeLdy5yWNInAVbn53UAkyiGw5j6uMhGBIXUnnUXIw5Xn89Q3ndX3dcnlz99C3kd';
-const MODEL = 'kimi-k2-turbo-preview';
+const API_BASE = 'https://api.deepseek.com/v1';
+const API_KEY = 'sk-efa712034bf4493e9b45f12f476b790f';
+const MODEL = 'deepseek-chat';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
