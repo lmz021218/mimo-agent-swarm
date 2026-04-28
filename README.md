@@ -2,6 +2,8 @@
 
 > 小米Mimo百万亿Tokens计划申请项目
 > 
+> **GitHub**: https://github.com/lmz021218/mimo-agent-swarm
+> 
 > 一个基于多Agent协作和长链推理的AI驱动软件开发框架
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)

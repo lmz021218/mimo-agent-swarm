@@ -48,9 +48,9 @@
 
 ## Q5: GitHub项目链接
 
-**GitHub项目链接**: `https://github.com/YOUR_USERNAME/mimo-agent-swarm`
+**GitHub项目链接**: https://github.com/lmz021218/mimo-agent-swarm
 
-> ⚠️ 提示：请将代码推送到你自己的GitHub账号，然后替换上面的链接。
+> ✅ 代码已成功推送到GitHub
 
 ### 使用证明截图建议
 
