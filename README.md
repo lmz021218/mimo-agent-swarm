@@ -1,6 +1,8 @@
 ﻿# Agent Swarm
 
-> 五个 AI Agent 串行协作。给一句话，它跑完需求 → 架构 → 编码 → 审查 → 测试全流程，产物落到 `workspace/`。
+五个 Agent 串成一条线。输入一句话，经过需求分析、架构设计、代码生成、审查、测试，产物写到 `workspace/`。
+
+每个 Agent 调用 DeepSeek API。API 不可用时 fallback 到本地模板，不需要联网。
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
@@ -8,156 +10,102 @@
 
 ---
 
-## 它是干嘛的
+## 用法
 
-你给一句话，五个 Agent 轮流处理它，最后产物落在 `workspace/` 目录里。每个 Agent 调用 DeepSeek API 做实际推理，API 挂了就走本地 fallback，断网也能跑。
-
-步骤：
-
-1. **需求分析** —— 把模糊的一句话拆成功能点、约束、验收标准
-2. **架构设计** —— 决定技术栈、模块怎么拆、数据怎么流
-3. **代码生成** —— 输出能直接跑 strict TypeScript，不是伪代码
-4. **代码审查** —— 找 bug、找类型漏洞、按 🔴🟡🟢 分级
-5. **测试生成** —— 写 vitest 用例，覆盖正常/边界/错误路径
-
-上一步的输出是下一步的输入。链条断了后面就全错，所以每个 Agent 的 prompt 都带了"基于前文"的约束。
-
----
-
-## 和 OpenCode 的关系
-
-这个项目**不是** OpenCode 插件。它是一组独立 Agent 类，你可以在任何 Node.js 项目里引入：
+独立 Agent 类。不是 OpenCode 插件，但可以复制到 skill 目录使用。
 
 ```typescript
 import { AgentSwarmOrchestrator } from './src/core/orchestrator.js';
-import { RequirementAgent } from './src/agents/requirement-agent.js';
-// ... 其余四个同理
-
 const orch = new AgentSwarmOrchestrator();
 orch.registerAgent(new RequirementAgent(config));
-// ...
-
 const { artifacts } = await orch.executeTask('你的需求');
-// artifacts[0] → 需求文档
-// artifacts[3] → 审查报告，依此类推
 ```
 
-如果你想把它塞进 OpenCode：把 Agent 类和 Orchestrator 复制到你的 OpenCode skill 目录，在 skill 里 `import` 并调用 `executeTask()` 就行。不需要改代码。
-
----
-
-## 跑起来
+## 安装
 
 ```bash
 git clone https://github.com/lmz021218/mimo-agent-swarm.git
 cd mimo-agent-swarm
 npm install
 
-# 默认任务
-npx tsx src/demo/run-demo.ts
+# 命令行
+npx tsx src/cli.ts -t "做一个命令行 todo 工具"
 
-# 自定义任务
-npx tsx src/demo/run-demo.ts "写一个把 Markdown 转 HTML 的 CLI 工具"
+# 从文件读取，合并保存
+npx tsx src/cli.ts -f task.txt -o output --save merged.md --json
 ```
 
 需要 Node.js 18+。
 
----
-
-## 真实运行结果
-
-下面是用 DeepSeek API 跑了一次真实的输出（任务："统计目录下所有文件的行数"）：
+## 运行示例
 
 ```
-Agent Swarm — 多Agent协作开发
-目标：写一个 Node.js 命令行工具，用来统计目录下所有文件的行数
+Agent Swarm
+目标：写一个 Node.js 命令行工具，统计目录下所有文件的行数
 
-╔══════════════════════════════════════╗
-║  任务: 写一个 Node.js 命令行工具...
-╚══════════════════════════════════════╝
+[需求分析] 开始...
+  发送请求 (56 chars)
+  功能：递归遍历、按行数排序、排除 node_modules
+  完成 (421 chars)
 
-🤖 [需求分析] 开始工作...
-   📤 发送请求 (56 chars)
-   📝 功能：支持命令行参数指定目录、递归遍历、按行数排序、排除 node_modules...
-   ✅ 完成 (421 chars)
+[架构设计] 开始...
+  发送请求 (472 chars)
+  Node.js + fs/promises + path，cli.ts → counter.ts → fileFilter.ts
+  完成 (1200 chars)
 
-🤖 [架构设计] 开始工作...
-   📤 发送请求 (472 chars)
-   📝 Node.js + fs/promises + path，cli.ts → counter.ts → fileFilter.ts...
-   ✅ 完成 (1200 chars)
+[代码生成] 开始...
+  发送请求 (1717 chars)
+  输出 5 个 TypeScript 文件
+  完成 (4516 chars)
 
-🤖 [代码生成] 开始工作...
-   📤 发送请求 (1717 chars)
-   📝 输出 5 个 TypeScript 文件：index.ts、cli.ts、counter.ts...
-   ✅ 完成 (4516 chars)
+[代码审查] 开始...
+  发送请求 (6228 chars)
+  fileFilter.ts 异步处理 bug / 空文件统计逻辑 / 排序健壮性
+  完成 (1131 chars)
 
-🤖 [代码审查] 开始工作...
-   📤 发送请求 (6228 chars)
-   📝 🔴 fileFilter.ts 异步处理 bug / 🟡 空文件统计逻辑 / 🟢 排序健壮性
-   ✅ 完成 (1131 chars)
+[测试生成] 开始...
+  发送请求 (7369 chars)
+  425 行 vitest 用例
+  完成 (14553 chars)
 
-🤖 [测试生成] 开始工作...
-   📤 发送请求 (7369 chars)
-   📝 425 行 vitest 用例，覆盖 cli、counter、filter、sorter
-   ✅ 完成 (14553 chars)
-
-📁 产物已保存到 workspace/
-✅ 完成。耗时 79s，总产物 21,821 chars
+产物已保存到 workspace/
+完成。耗时 79s，总产物 21,821 chars
 ```
 
-五个文件都在 `workspace/` 目录里，可以直接打开看。
-
----
-
-## 文件结构
+## 文件
 
 ```
-├── src/
-│   ├── core/
-│   │   ├── types.ts            # Artifact、AgentConfig、ReasoningChain
-│   │   ├── base-agent.ts       # execute() 调 LLM，fallback 兜底
-│   │   ├── llm-client.ts       # DeepSeek 流式调用，兼容 OpenAI 格式
-│   │   └── orchestrator.ts     # 串行调度，上下文传递，产物落盘
-│   ├── agents/
-│   │   ├── requirement-agent.ts
-│   │   ├── architecture-agent.ts
-│   │   ├── codegen-agent.ts
-│   │   ├── review-agent.ts
-│   │   └── test-agent.ts
-│   ├── demo/
-│   │   └── run-demo.ts         # 一行命令跑完整流程
-│   └── index.ts                # 导出所有公共类
-├── index.html                  # 展示页面
-├── package.json
-└── tsconfig.json               # strict: true
+src/
+  core/
+    types.ts            # Artifact、AgentConfig
+    base-agent.ts       # LLM 调用 + fallback
+    llm-client.ts       # DeepSeek API
+    orchestrator.ts     # 串行调度
+  agents/
+    requirement-agent.ts
+    architecture-agent.ts
+    codegen-agent.ts
+    review-agent.ts
+    test-agent.ts
+  cli.ts                # 命令行入口
+  demo/
+    run-demo.ts
+  index.ts
 ```
 
----
+## 数据
 
-## 当前指标
+一次完整运行（统计目录文件行数）：
 
-一次完整运行的数据：
-
-| 项目 | 数据 |
+| 项目 | 数值 |
 |------|------|
-| 耗时 | 79 秒（串行 5 次 API 调用） |
-| 总产物 | 21,821 字符 |
-| 需求分析 | 421 chars |
-| 架构设计 | 1,200 chars |
-| 代码生成 | 4,516 chars / 5 个 .ts 文件 |
-| 代码审查 | 1,131 chars / 6 个问题点 |
-| 测试生成 | 14,553 chars / 425 行 vitest |
-| 编译 | TypeScript strict，零错误 |
+| 耗时 | 79s |
+| 总产物 | 21,821 chars |
+| 代码文件 | 5 个 .ts |
+| 审查问题 | 6 个 |
+| 测试用例 | 425 行 vitest |
 
-换 API key：改 `src/core/llm-client.ts` 头部的三个常量。
-
----
-
-## 如果 API 挂了
-
-每个 Agent 带了 fallback。`base-agent.ts` 里 `execute()` 的 catch 块会走 `fallbackExecute()`，用内置的模板产出结果。你断网也能跑，产物照样生成。
-
----
+换 API key：改 `src/core/llm-client.ts` 头部的常量。
 
 ## License
 

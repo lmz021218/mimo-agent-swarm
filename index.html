@@ -4,395 +4,351 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Swarm</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0d1117;
-            --bg-card: #161b22;
+            --surface: #161b22;
             --border: #21262d;
             --text: #c9d1d9;
-            --text-muted: #8b949e;
+            --muted: #8b949e;
             --link: #58a6ff;
             --accent: #f0883e;
-            --code-bg: #0d1117;
-            --radius: 8px;
-            --radius-sharp: 4px;
-            --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+            --success: #3fb950;
+            --code-bg: #0a0c10;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: var(--font);
+            font-family: 'DM Sans', -apple-system, sans-serif;
             font-size: 16px;
-            line-height: 1.625;
+            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
         }
 
-        .wrap {
-            max-width: 760px;
+        .container {
+            max-width: 720px;
             margin: 0 auto;
-            padding: 48px 24px 96px;
+            padding: 64px 24px;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 8px;
+        header {
+            margin-bottom: 48px;
         }
-        .logo-mark {
-            width: 36px;
-            height: 36px;
-            background: var(--accent);
-            border-radius: 6px;
-            flex-shrink: 0;
-        }
-        .logo-text { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
 
-        .subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; max-width: 520px; }
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        .lead {
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.6;
+            max-width: 560px;
+        }
 
         .badges {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            margin-top: 20px;
             flex-wrap: wrap;
-            margin-bottom: 48px;
         }
+
         .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 20px;
             border: 1px solid var(--border);
-            color: var(--text-muted);
-            background: var(--bg-card);
+            color: var(--muted);
+            background: var(--surface);
         }
-        .badge-dot { width: 8px; height: 8px; border-radius: 50%; }
-        .badge-dot.green { background: #3fb950; }
-        .badge-dot.amber { background: var(--accent); }
 
         h2 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
-            color: var(--text);
-            margin-bottom: 16px;
+            margin: 48px 0 16px;
             letter-spacing: -0.01em;
         }
 
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .flow-diagram {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 20px 0;
-        }
-        .flow-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .flow-node {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sharp);
-            padding: 8px 16px;
-            font-size: 14px;
-            font-family: var(--font-mono);
-            color: var(--text);
-            text-align: center;
-            min-width: 100px;
-        }
-        .flow-node.orch {
-            border-color: var(--accent);
-            color: var(--accent);
+        h3 {
+            font-size: 16px;
             font-weight: 600;
-            padding: 12px 24px;
+            margin: 24px 0 8px;
         }
-        .flow-arrow { color: var(--text-muted); font-size: 18px; }
 
-        .terminal {
-            background: #0a0c10;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            margin-bottom: 24px;
+        p {
+            margin-bottom: 12px;
+            color: var(--muted);
         }
-        .terminal-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            background: #161b22;
-            border-bottom: 1px solid var(--border);
-        }
-        .terminal-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-        }
-        .terminal-dot.r { background: #ff5f56; }
-        .terminal-dot.y { background: #ffbd2e; }
-        .terminal-dot.g { background: #27c93f; }
-        .terminal-title {
-            font-size: 12px;
-            font-family: var(--font-mono);
-            color: var(--text-muted);
-            margin-left: 8px;
-        }
-        .terminal-body {
-            padding: 20px;
-            font-family: var(--font-mono);
-            font-size: 13px;
-            line-height: 1.7;
-            color: #e6edf3;
-            overflow-x: auto;
-            max-height: 480px;
-            overflow-y: auto;
-        }
-        .terminal-body .dim { color: var(--text-muted); }
-        .terminal-body .hl { color: var(--accent); }
-        .terminal-body .ok { color: #3fb950; }
-        .terminal-body .info { color: var(--link); }
 
-        .features {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
+        a {
+            color: var(--link);
+            text-decoration: none;
         }
-        @media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
-        .feature {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
+
+        a:hover {
+            text-decoration: underline;
         }
-        .feature h3 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-        .feature p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
 
         pre {
             background: var(--code-bg);
             border: 1px solid var(--border);
-            border-radius: var(--radius-sharp);
-            padding: 18px;
-            font-family: var(--font-mono);
+            border-radius: 4px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             line-height: 1.6;
             overflow-x: auto;
-            color: #e6edf3;
-            margin-bottom: 24px;
+            margin: 16px 0;
+            color: var(--text);
         }
-        pre .kw { color: #ff7b72; }
-        pre .str { color: #a5d6ff; }
-        pre .fn { color: #d2a8ff; }
-        pre .cmt { color: #8b949e; font-style: italic; }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 32px;
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--text);
         }
-        @media (max-width: 600px) { .stats { grid-template-columns: 1fr 1fr; } }
-        .stat {
-            background: var(--bg-card);
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .terminal {
+            background: var(--code-bg);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 18px;
-            text-align: center;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 24px 0;
         }
-        .stat-num { font-size: 28px; font-weight: 600; color: var(--accent); }
-        .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
-        .footer {
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.r { background: #ff5f56; }
+        .dot.y { background: #ffbd2e; }
+        .dot.g { background: #27c93f; }
+
+        .terminal-title {
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--muted);
+            margin-left: 4px;
+        }
+
+        .terminal-body {
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text);
+            overflow-x: auto;
+        }
+
+        .dim { color: var(--muted); }
+        .hl { color: var(--accent); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--muted);
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: var(--text);
+        }
+
+        .flow {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 16px 0;
+        }
+
+        .flow-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .flow-arrow {
+            color: var(--muted);
+        }
+
+        footer {
             margin-top: 64px;
             padding-top: 24px;
             border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
+            color: var(--muted);
             font-size: 13px;
-            color: var(--text-muted);
         }
-        .footer a { color: var(--link); text-decoration: none; }
-        .footer a:hover { text-decoration: underline; }
 
-        a { color: var(--link); text-decoration: none; transition: color 150ms ease-out; }
-        a:hover { color: #79c0ff; }
-
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="wrap">
+<div class="container">
 
-    <div class="logo">
-        <div class="logo-mark"></div>
-        <div class="logo-text">Agent Swarm</div>
-    </div>
-    <p class="subtitle">
-        五个 AI Agent 分工协作——需求、架构、编码、审查、测试——把一句话变成完整项目。接 DeepSeek，有 fallback，零编译错误。
-    </p>
-
-    <div class="badges">
-        <span class="badge"><span class="badge-dot green"></span>TypeScript Strict — 零错误</span>
-        <span class="badge"><span class="badge-dot amber"></span>DeepSeek API</span>
-        <span class="badge"><span class="badge-dot green"></span>5 个 Agent 协作</span>
-        <span class="badge">MIT</span>
-    </div>
-
-    <div class="stats">
-        <div class="stat">
-            <div class="stat-num">5</div>
-            <div class="stat-label">专业 Agent</div>
+    <header>
+        <h1>Agent Swarm</h1>
+        <p class="lead">
+            五个 Agent 串成一条线。输入一句话，经过需求分析、架构设计、代码生成、审查、测试，产物写到 workspace/。
+        </p>
+        <div class="badges">
+            <span class="badge">TypeScript Strict</span>
+            <span class="badge">DeepSeek API</span>
+            <span class="badge">5 Agents</span>
+            <span class="badge">MIT</span>
         </div>
-        <div class="stat">
-            <div class="stat-num">6</div>
-            <div class="stat-label">推理步骤 / 任务</div>
-        </div>
-        <div class="stat">
-            <div class="stat-num">79s</div>
-            <div class="stat-label">一次完整运行</div>
-        </div>
-        <div class="stat">
-            <div class="stat-num">21,821</div>
-            <div class="stat-label">字符产物 / 任务</div>
-        </div>
-    </div>
+    </header>
 
     <h2>工作流程</h2>
-    <div class="card">
-        <div class="flow-diagram">
-            <div class="flow-node orch">Orchestrator</div>
-            <div class="flow-arrow">↓</div>
-            <div class="flow-row">
-                <div class="flow-node">需求分析</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-node">架构设计</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-node">代码生成</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-node">审查</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-node">测试</div>
-            </div>
-            <div class="flow-arrow" style="margin-top:4px">↓</div>
-            <div class="flow-node" style="border-color: #3fb950; color: #3fb950;">workspace/ — 5 个产物文件</div>
-        </div>
+    <div class="flow">
+        <span class="flow-item">需求分析</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-item">架构设计</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-item">代码生成</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-item">代码审查</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-item">测试生成</span>
     </div>
 
-    <h2>真实运行输出</h2>
+    <h2>用法</h2>
+    <pre><code>import { AgentSwarmOrchestrator } from './src/core/orchestrator.js';
+const orch = new AgentSwarmOrchestrator();
+orch.registerAgent(new RequirementAgent(config));
+const { artifacts } = await orch.executeTask('你的需求');</code></pre>
+
+    <h2>安装</h2>
+    <pre><code>git clone https://github.com/lmz021218/mimo-agent-swarm.git
+cd mimo-agent-swarm
+npm install
+
+npx tsx src/cli.ts -t "做一个命令行 todo 工具"
+npx tsx src/cli.ts -f task.txt -o output --save merged.md --json</code></pre>
+
+    <h2>运行示例</h2>
     <div class="terminal">
-        <div class="terminal-bar">
-            <span class="terminal-dot r"></span>
-            <span class="terminal-dot y"></span>
-            <span class="terminal-dot g"></span>
-            <span class="terminal-title">demo run — line-counter tool</span>
+        <div class="terminal-header">
+            <span class="dot r"></span>
+            <span class="dot y"></span>
+            <span class="dot g"></span>
+            <span class="terminal-title">cli.ts — line counter tool</span>
         </div>
         <div class="terminal-body">
-<span class="dim">Agent Swarm — 多Agent协作开发</span>
-<span class="dim">目标：写一个 Node.js 命令行工具，用来统计目录下所有文件的行数</span>
+<span class="dim">Agent Swarm</span>
+<span class="dim">目标：写一个 Node.js 命令行工具，统计目录下所有文件的行数</span>
 
-<span class="hl">╔══════════════════════════════════════╗</span>
-<span class="hl">║  任务: 写一个 Node.js 命令行工具...</span>
-<span class="hl">╚══════════════════════════════════════╝</span>
+<span class="hl">[需求分析]</span> 开始...
+  发送请求 (56 chars)
+  功能：递归遍历、按行数排序、排除 node_modules
+  完成 (421 chars)
 
-<span class="info">🤖 [需求分析] 开始工作...</span>
-<span class="dim">   📤 发送请求 (56 chars)</span>
-   📝 功能：支持通过命令行参数指定目标目录路径...
-<span class="ok">   ✅ [需求分析] 完成 (421 chars)</span>
+<span class="hl">[架构设计]</span> 开始...
+  发送请求 (472 chars)
+  Node.js + fs/promises + path
+  完成 (1200 chars)
 
-<span class="info">🤖 [架构设计] 开始工作...</span>
-<span class="dim">   📤 发送请求 (472 chars)</span>
-   📝 技术栈：Node.js 18 LTS · fs/promises · path...
-<span class="ok">   ✅ [架构设计] 完成 (1200 chars)</span>
+<span class="hl">[代码生成]</span> 开始...
+  发送请求 (1717 chars)
+  输出 5 个 TypeScript 文件
+  完成 (4516 chars)
 
-<span class="info">🤖 [代码生成] 开始工作...</span>
-<span class="dim">   📤 发送请求 (1717 chars)</span>
-   📝 index.ts · cli.ts · counter.ts · fileFilter.ts...
-<span class="ok">   ✅ [代码生成] 完成 (4516 chars)</span>
+<span class="hl">[代码审查]</span> 开始...
+  发送请求 (6228 chars)
+  fileFilter.ts 异步处理 bug / 空文件统计逻辑
+  完成 (1131 chars)
 
-<span class="info">🤖 [代码审查] 开始工作...</span>
-<span class="dim">   📤 发送请求 (6228 chars)</span>
-   📝 🔴 必须修: fileFilter 异步处理...
-<span class="ok">   ✅ [代码审查] 完成 (1131 chars)</span>
+<span class="hl">[测试生成]> 开始...
+  发送请求 (7369 chars)
+  425 行 vitest 用例
+  完成 (14553 chars)
 
-<span class="info">🤖 [测试生成] 开始工作...</span>
-<span class="dim">   📤 发送请求 (7369 chars)</span>
-   📝 425 行 vitest 测试用例...
-<span class="ok">   ✅ [测试生成] 完成 (14553 chars)</span>
-
-<span class="hl">📁 产物已保存到 workspace/</span>
-<span class="ok">✅ 完成。耗时 79066ms，产物 5 个</span>
-
-<span class="dim">产物清单：
-  1. [requirements] 421 chars
-  2. [architecture] 1200 chars
-  3. [code] 4516 chars
-  4. [review] 1131 chars
-  5. [tests] 14553 chars</span>
+<span class="dim">产物已保存到 workspace/</span>
+<span class="dim">完成。耗时 79s，总产物 21,821 chars</span>
         </div>
     </div>
 
-    <h2>极简用法</h2>
-    <pre><span class="kw">import</span> { AgentSwarmOrchestrator, RequirementAgent, ArchitectureAgent,
-         CodeGenAgent, ReviewAgent, TestAgent } <span class="kw">from</span> <span class="str">'agent-swarm'</span>;
+    <h2>数据</h2>
+    <table>
+        <tr><th>项目</th><th>数值</th></tr>
+        <tr><td>耗时</td><td>79s</td></tr>
+        <tr><td>总产物</td><td>21,821 chars</td></tr>
+        <tr><td>代码文件</td><td>5 个 .ts</td></tr>
+        <tr><td>审查问题</td><td>6 个</td></tr>
+        <tr><td>测试用例</td><td>425 行 vitest</td></tr>
+    </table>
 
-<span class="kw">const</span> orch = <span class="kw">new</span> AgentSwarmOrchestrator();
-orch.registerAgent(<span class="kw">new</span> RequirementAgent(config));
-<span class="cmt">// ... 注册其余 4 个 Agent ...</span>
+    <h2>文件</h2>
+    <pre><code>src/
+  core/
+    types.ts
+    base-agent.ts       # LLM 调用 + fallback
+    llm-client.ts       # DeepSeek API
+    orchestrator.ts     # 串行调度
+  agents/
+    requirement-agent.ts
+    architecture-agent.ts
+    codegen-agent.ts
+    review-agent.ts
+    test-agent.ts
+  cli.ts                # 命令行入口
+  demo/
+    run-demo.ts
+  index.ts
+</code></pre>
 
-<span class="kw">const</span> result = <span class="kw">await</span> orch.executeTask(
-  <span class="str">'写一个 Node.js 命令行工具，用来统计目录下所有文件的行数'</span>
-);
-<span class="cmt">// result.artifacts → [需求分析, 架构设计, 代码, 审查报告, 测试用例]</span>
-<span class="cmt">// 产物自动写入 workspace/ 目录</span></pre>
+    <footer>
+        GitHub <a href="https://github.com/lmz021218/mimo-agent-swarm">lmz021218/mimo-agent-swarm</a>
+        · DeepSeek API · TypeScript · Node.js
+    </footer>
 
-    <h2>核心设计</h2>
-    <div class="features">
-        <div class="feature">
-            <h3>链式上下文传递</h3>
-            <p>前一个 Agent 的输出是后一个的输入——需求喂给架构，架构喂给编码，链条不断。</p>
-        </div>
-        <div class="feature">
-            <h3>流式推理可见</h3>
-            <p>每个 Agent 调用 LLM 时，推理内容实时输出到终端，不是黑盒。</p>
-        </div>
-        <div class="feature">
-            <h3>两级容错</h3>
-            <p>API 挂了？每个 Agent 自带 fallback 实现。断网也能跑出完整产物。</p>
-        </div>
-        <div class="feature">
-            <h3>类型安全第一</h3>
-            <p>全项目 TypeScript strict mode。11 个源文件，零编译错误，零 LSP 诊断。</p>
-        </div>
-    </div>
-
-    <div class="footer">
-        <span>GitHub <a href="https://github.com/lmz021218/mimo-agent-swarm">lmz021218/mimo-agent-swarm</a></span>
-        <span>DeepSeek API · TypeScript · Node.js</span>
-    </div>
 </div>
 </body>
 </html>
