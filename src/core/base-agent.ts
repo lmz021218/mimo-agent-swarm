@@ -1,123 +1,73 @@
-import { AgentConfig, AgentMessage, AgentCapability } from './types.js';
+import { AgentConfig, AgentMessage, Artifact, ArtifactType } from './types.js';
+import { chatCompletionStream, ChatMessage } from './llm-client.js';
 
 /**
- * Agent基类 - 所有专业Agent的抽象基类
- * 实现消息接收、处理和发送的核心逻辑
+ * Agent基类 - 支持真实LLM调用的Agent抽象
  */
 export abstract class BaseAgent {
   protected config: AgentConfig;
-  protected messageQueue: AgentMessage[] = [];
-  protected isProcessing: boolean = false;
 
   constructor(config: AgentConfig) {
     this.config = config;
   }
 
-  getId(): string {
-    return this.config.id;
-  }
-
-  getName(): string {
-    return this.config.name;
-  }
-
-  getRole(): string {
-    return this.config.role;
-  }
-
-  getCapabilities(): AgentCapability[] {
-    return this.config.capabilities;
-  }
+  getId(): string { return this.config.id; }
+  getName(): string { return this.config.name; }
+  getRole(): string { return this.config.role; }
 
   /**
-   * 接收消息并加入队列
+   * 接收消息并处理（兼容旧接口）
    */
   receiveMessage(message: AgentMessage): void {
-    this.messageQueue.push(message);
-    if (!this.isProcessing) {
-      this.processQueue();
-    }
+    console.log(`[${this.getName()}] 收到消息: ${message.type} from ${message.from}`);
   }
 
   /**
-   * 处理消息队列
+   * 调用 LLM 执行专业任务
    */
-  private async processQueue(): Promise<void> {
-    this.isProcessing = true;
-    
-    while (this.messageQueue.length > 0) {
-      const message = this.messageQueue.shift()!;
-      await this.handleMessage(message);
-    }
-    
-    this.isProcessing = false;
-  }
+  async execute(taskDescription: string, context: string = ''): Promise<Artifact> {
+    console.log(`\n🤖 [${this.getName()}] 开始工作...`);
 
-  /**
-   * 抽象方法：处理具体消息逻辑
-   * 子类必须实现此方法来定义Agent的专业行为
-   */
-  protected abstract handleMessage(message: AgentMessage): Promise<void>;
+    const systemPrompt = this.buildSystemPrompt(taskDescription);
+    const userPrompt = this.buildUserPrompt(taskDescription, context);
 
-  /**
-   * 生成响应消息
-   */
-  protected createResponse(to: string, content: string, metadata?: Record<string, unknown>): AgentMessage {
-    return {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      from: this.config.id,
-      to,
-      type: 'response',
-      content,
-      timestamp: Date.now(),
-      metadata
-    };
-  }
-
-  /**
-   * 广播消息给所有Agent
-   */
-  protected createBroadcast(content: string, metadata?: Record<string, unknown>): AgentMessage {
-    return {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      from: this.config.id,
-      to: 'broadcast',
-      type: 'broadcast',
-      content,
-      timestamp: Date.now(),
-      metadata
-    };
-  }
-
-  /**
-   * 获取系统提示词
-   */
-  getSystemPrompt(): string {
-    return this.config.systemPrompt;
-  }
-
-  /**
-   * 模拟LLM推理过程（实际项目中会调用Mimo API）
-   */
-  protected async simulateReasoning(prompt: string, context: string[]): Promise<string> {
-    // 这里在实际使用中会调用小米Mimo API
-    // 当前为模拟实现，展示推理框架
-    const reasoningSteps = [
-      `分析输入: ${prompt.substring(0, 50)}...`,
-      `结合上下文 (${context.length} 条历史记录)`,
-      `应用 ${this.config.role} 的专业知识`,
-      `生成响应...`
+    const messages: ChatMessage[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
     ];
-    
-    // 模拟推理延迟
-    await this.delay(100 + Math.random() * 200);
-    
-    return reasoningSteps.join('\n');
+
+    console.log(`   📤 发送请求 (${userPrompt.length} chars)`);
+
+    try {
+      process.stdout.write('   📝 ');
+      let fullContent = '';
+
+      for await (const chunk of chatCompletionStream(messages, { temperature: this.config.temperature })) {
+        fullContent += chunk;
+        process.stdout.write(chunk);
+      }
+      process.stdout.write('\n');
+
+      console.log(`   ✅ [${this.getName()}] 完成 (${fullContent.length} chars)`);
+
+      return {
+        id: `${this.config.id}_${Date.now()}`,
+        type: this.getArtifactType(),
+        content: fullContent,
+        author: this.getId(),
+        version: 1,
+        createdAt: Date.now(),
+      };
+    } catch (error) {
+      console.error(`   ❌ [${this.getName()}] API 出错，使用 fallback:`, (error as Error).message);
+      return this.fallbackExecute(taskDescription, context);
+    }
   }
 
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+  protected abstract getArtifactType(): ArtifactType;
+  protected abstract buildSystemPrompt(task: string): string;
+  protected abstract buildUserPrompt(task: string, context: string): string;
+  protected abstract fallbackExecute(task: string, context: string): Promise<Artifact>;
 
   toString(): string {
     return `${this.config.name} (${this.config.role})`;

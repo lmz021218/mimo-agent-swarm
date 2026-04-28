@@ -1,91 +1,86 @@
 import { BaseAgent } from '../core/base-agent.js';
-import { AgentMessage, Artifact } from '../core/types.js';
+import { Artifact } from '../core/types.js';
 
-/**
- * 代码生成Agent
- * 基于架构设计，生成高质量、可维护的代码
- */
 export class CodeGenAgent extends BaseAgent {
-  
-  protected async handleMessage(message: AgentMessage): Promise<void> {
-    console.log(`[${this.getName()}] 收到消息: ${message.type} from ${message.from}`);
-    
-    if (message.content.includes('架构') || message.content.includes('设计')) {
-      const code = await this.generateCode(message.content);
-      console.log(`[${this.getName()}] 代码生成完成，代码长度: ${code.length}`);
+  protected getArtifactType(): 'code' { return 'code'; }
+
+  protected buildSystemPrompt(_task: string): string {
+    return `你是 TypeScript 开发。根据架构设计写出可运行的代码。
+
+规则：
+- 用严格 TypeScript，所有类型显式声明
+- 不要 any，不要 @ts-ignore
+- 代码要能直接放到 .ts 文件里跑
+- 不要写注释解释代码在做什么，除非有坑
+- 类名、函数名要能一眼看出用途
+- 不要写 package.json——只写业务代码`;
+  }
+
+  protected buildUserPrompt(task: string, context: string): string {
+    if (context) {
+      return `架构设计：\n${context}\n\n按照架构写出实现代码。只输出 TypeScript 代码文件，每个文件用 ### 文件名.ts 格式分隔。`;
     }
+    return `为任务"${task}"写核心实现代码。不需要完整项目，只写最关键的 2-3 个文件。`;
   }
 
-  private async generateCode(architecture: string): Promise<string> {
-    const reasoning = await this.simulateReasoning(
-      `生成代码: ${architecture.substring(0, 100)}...`,
-      ['编码规范', '最佳实践', '类型安全']
-    );
+  async fallbackExecute(task: string, _context: string): Promise<Artifact> {
+    return {
+      id: `code_fallback_${Date.now()}`,
+      type: 'code',
+      content: `// 生成的代码（本地 fallback，API 未连接）
+// 任务：${task}
 
-    return `
-## 生成的代码
+### orchestrator.ts
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { join } from 'node:path';
 
-### 核心服务类
-\`\`\`typescript
-export class AgentOrchestrator {
-  private agents: Map<string, BaseAgent> = new Map();
-  private taskQueue: Task[] = [];
-  
-  async registerAgent(agent: BaseAgent): Promise<void> {
-    this.agents.set(agent.getId(), agent);
-    console.log(\`Agent \${agent.getName()} 已注册\`);
-  }
-  
-  async executeTask(task: Task): Promise<Result> {
-    const plan = await this.createExecutionPlan(task);
-    return this.executePlan(plan);
-  }
-  
-  private async createExecutionPlan(task: Task): Promise<ExecutionPlan> {
-    // 智能任务分解与Agent分配
-    const plan = new ExecutionPlan(task);
-    
-    for (const phase of task.phases) {
-      const bestAgent = this.selectBestAgent(phase);
-      plan.assign(phase, bestAgent);
-    }
-    
-    return plan;
-  }
-}
-\`\`\`
-
-### 类型定义
-\`\`\`typescript
 interface Task {
   id: string;
-  type: TaskType;
-  priority: number;
-  payload: unknown;
+  description: string;
+  status: 'pending' | 'running' | 'done';
+  result?: string;
 }
 
-interface Result {
-  success: boolean;
-  data: unknown;
-  metrics: ExecutionMetrics;
-}
-\`\`\`
+export class TaskOrchestrator {
+  private tasks: Map<string, Task> = new Map();
 
-### 生成说明
-${reasoning}
-`;
+  createTask(description: string): Task {
+    const task: Task = {
+      id: \`task_\${Date.now()}\`,
+      description,
+      status: 'pending',
+    };
+    this.tasks.set(task.id, task);
+    return task;
   }
 
-  async generateImplementation(architecture: string): Promise<Artifact> {
-    const code = await this.generateCode(architecture);
-    
-    return {
-      id: `code_${Date.now()}`,
-      type: 'code',
-      content: code,
+  async executeTask(taskId: string): Promise<Task> {
+    const task = this.tasks.get(taskId);
+    if (!task) throw new Error(\`Task \${taskId} not found\`);
+
+    task.status = 'running';
+    const outputDir = join(process.cwd(), 'workspace');
+    await mkdir(outputDir, { recursive: true });
+    await writeFile(join(outputDir, 'output.txt'), JSON.stringify(task, null, 2));
+
+    task.status = 'done';
+    return task;
+  }
+
+  getAllTasks(): Task[] {
+    return Array.from(this.tasks.values());
+  }
+}
+
+### index.ts
+export { TaskOrchestrator } from './orchestrator.js';
+export type { Task } from './orchestrator.js';
+
+console.log('Task Orchestrator loaded');
+`,
       author: this.getId(),
       version: 1,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
   }
 }

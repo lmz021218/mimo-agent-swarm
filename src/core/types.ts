@@ -32,9 +32,11 @@ export type TaskPhase =
   | 'refinement' 
   | 'completed';
 
+export type ArtifactType = 'requirements' | 'architecture' | 'code' | 'document' | 'diagram' | 'test' | 'tests' | 'review';
+
 export interface Artifact {
   id: string;
-  type: 'code' | 'document' | 'diagram' | 'test' | 'review';
+  type: ArtifactType;
   content: string;
   author: string;
   version: number;

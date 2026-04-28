@@ -40,6 +40,9 @@ coverage/
 APPLICATION.md
 SCREENSHOT_GUIDE.md
 
+# Runtime output
+workspace/
+
 # Temporary files
 tmp/
 temp/

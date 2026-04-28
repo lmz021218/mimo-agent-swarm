@@ -1,67 +1,54 @@
 import { BaseAgent } from '../core/base-agent.js';
-import { AgentMessage, Artifact } from '../core/types.js';
+import { Artifact } from '../core/types.js';
 
-/**
- * 需求分析Agent
- * 负责理解用户需求，拆解任务，提取关键信息
- */
 export class RequirementAgent extends BaseAgent {
-  
-  protected async handleMessage(message: AgentMessage): Promise<void> {
-    console.log(`[${this.getName()}] 收到消息: ${message.type} from ${message.from}`);
-    
-    if (message.type === 'request') {
-      const analysis = await this.analyzeRequirements(message.content);
-      const response = this.createResponse(message.from, analysis);
-      
-      // 在真实场景中，这里会将消息发送给协调器
-      console.log(`[${this.getName()}] 分析完成，响应长度: ${response.content.length}`);
+  protected getArtifactType(): 'requirements' { return 'requirements'; }
+
+  protected buildSystemPrompt(_task: string): string {
+    return `你是需求分析师。把用户的一句话需求拆成清晰的功能点、约束条件和验收标准。
+
+规则：
+- 只输出结构化内容，不要寒暄
+- 每个功能点一行，用"功能："开头
+- 约束条件用"约束："开头
+- 不要评价需求好坏，只做拆解
+- 不要用"此外""进一步""值得注意的是"这类词`;
+  }
+
+  protected buildUserPrompt(task: string, context: string): string {
+    if (context) {
+      return `前面已完成的工作：\n${context}\n\n基于上面内容，分析："${task}"`;
     }
+    return `分析需求："${task}"。列出功能点、约束条件和验收标准。`;
   }
 
-  private async analyzeRequirements(content: string): Promise<string> {
-    const reasoning = await this.simulateReasoning(
-      `分析需求: ${content}`,
-      ['历史需求模式', '领域知识库']
-    );
-
-    return `
-## 需求分析报告
-
-### 原始需求
-${content}
-
-### 核心功能点
-1. 功能模块识别与拆分
-2. 用户场景分析
-3. 非功能性需求提取
-
-### 技术约束
-- 性能要求
-- 安全要求
-- 兼容性要求
-
-### 分析结论
-${reasoning}
-
-### 建议下一步
-移交架构设计Agent进行系统设计
-`;
-  }
-
-  /**
-   * 主动分析任务
-   */
-  async analyzeTask(taskDescription: string): Promise<Artifact> {
-    const analysis = await this.analyzeRequirements(taskDescription);
-    
+  async fallbackExecute(task: string, _context: string): Promise<Artifact> {
     return {
-      id: `req_${Date.now()}`,
-      type: 'document',
-      content: analysis,
+      id: `req_fallback_${Date.now()}`,
+      type: 'requirements',
+      content: `需求分析（本地生成，API 未连接）
+
+原始输入：${task}
+
+功能点：
+功能：用户输入自然语言需求，系统自动拆分任务
+功能：任务按依赖关系分配到不同 Agent 执行
+功能：每个 Agent 产出对应类型的文档或代码
+功能：审查 Agent 检查代码质量并给出修改建议
+功能：测试 Agent 生成对应的单元测试用例
+
+约束：
+约束：TypeScript 严格模式，不允许 any 类型
+约束：ESLint 零警告
+约束：每个模块需有 fallback 实现，确保离线可用
+
+验收标准：
+- 输入一句话需求，能生成 5 类产物
+- 编译零错误
+- 演示执行时间 < 5 秒`,
       author: this.getId(),
       version: 1,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
   }
 }
